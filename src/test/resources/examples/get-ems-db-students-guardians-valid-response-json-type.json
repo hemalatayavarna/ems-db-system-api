@@ -1,0 +1,35 @@
+[
+  {
+    "edId": 123456789,
+    "guardianId": 3069412211534000051,
+    "guardianSalutation": "Mr",
+    "guardianLastName": "Nguyen",
+    "guardianFirstName": "Minh",
+    "guardianPhone": null,
+    "guardianMobile": "0424449527",
+    "guardianEmail": "m.triet.nguyen@gmail.com",
+    "lastUpdatedOn" : "2022-01-21T11:57:16.7183548"
+  },
+  {
+    "edId": null,
+    "guardianId": 3040825497044000023,
+    "guardianSalutation": null,
+    "guardianLastName": "Raouf",
+    "guardianFirstName": "Mian",
+    "guardianPhone": null,
+    "guardianMobile": "0413097966",
+    "guardianEmail": "mianraouf@yahoo.com",
+    "lastUpdatedOn" : "2022-01-21T11:57:16.7183548"
+  },
+  {
+    "edId": null,
+    "guardianId": 3046824395313000058,
+    "guardianSalutation": "Ms",
+    "guardianLastName": "Kerley",
+    "guardianFirstName": "Sasha",
+    "guardianPhone": "0407198620",
+    "guardianMobile": "0407198620",
+    "guardianEmail": "Sasha.Kerley302@schools.sa.edu.au",
+    "lastUpdatedOn" : "2022-01-21T11:57:16.7183548"
+  }
+]

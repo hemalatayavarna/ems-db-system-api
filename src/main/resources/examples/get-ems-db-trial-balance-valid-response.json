@@ -1,0 +1,22 @@
+[
+	{
+		"localAccount": "0000-0000-1101-06",
+		"month": 202109,
+		"company": "0000",
+		"localAccountCategory": "01",
+		"localTrialBalances": 11818.53,
+		"reportingUnit": "0325",
+		"localAccountCode": "1101",
+		"localAccountDescription": "BANK ACCOUNT- OPERATING"
+	},
+	{
+		"localAccount": "0000-0000-1102-06",
+		"month": 202109,
+		"company": "0000",
+		"localAccountCategory": "01",
+		"localTrialBalances": -5866.16,
+		"reportingUnit": "0325",
+		"localAccountCode": "1102",
+		"localAccountDescription": "BANK ACCOUNT- SASIF"
+	}
+]

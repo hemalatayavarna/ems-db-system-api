@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd ">
+    <flow name="ems-db-system-api-main">
+        <http:listener path="${api.http.path}${api.http.version}" config-ref="ems-system-api-httpListenerConfig" doc:name="HTTP Listener for EMS DB System API">
+            <http:response statusCode="#[vars.httpStatus default 200]">
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:response>
+            <http:error-response statusCode="#[vars.httpStatus default 500]">
+                <http:body><![CDATA[#[payload]]]></http:body>
+                <http:headers><![CDATA[#[vars.outboundHeaders default {}]]]></http:headers>
+            </http:error-response>
+        </http:listener>
+        <apikit:router config-ref="ems-db-system-api-config" />
+		<error-handler ref="api-kit-error-handler" />
+    </flow>
+    <flow name="get:\health:ems-db-system-api-config" doc:id="068fdd8c-7839-48ae-b79b-e0f86bd9018f">
+		<ee:transform xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd" doc:name="Get Health Report">
+            <ee:message>
+                <ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+  name: p('system.context'),
+  status: "OK",
+  timestamp: (now() as DateTime) >> p('property.timezone')
+}]]></ee:set-payload>
+            </ee:message>
+        </ee:transform>
+		<error-handler ref="business-error-handler" />
+    </flow>
+    <flow name="get:\reports\trial-balance:ems-db-system-api-config" doc:id="3cfe1952-4ca2-448e-b5ef-ee0c0dab6066">
+		<logger level="INFO" doc:name="Log Start Get TrialBalance Details" doc:id="41b80418-6c4a-4934-8b76-53a4edad37e5" message="Start Get TrialBalance Details"/>
+		<flow-ref doc:name="ems-db-system-api:log:subflow" doc:id="483c009f-b862-4629-bc71-e150dd312bbd" name="ems-db-system-api:log:subflow"/>
+		<flow-ref doc:name="impl-process-trial-balance-requests:get-trialbalance:subflow" doc:id="b3e98987-96a3-4d9e-9750-d7102367b562" name="impl-process-trial-balance-requests:get-triabalance:subflow"/>
+		<logger level="INFO" doc:name="Log End Get TrialBalance Details" doc:id="9c4b303b-9df9-4a23-a9f7-ac00affe0001" message="End Get TrialBalance Details" />
+		<error-handler ref="business-error-handler" />		
+    </flow>
+	<flow name="get:\reports\trial-balance\transactions:ems-db-system-api-config" doc:id="2d635e0a-0dea-478e-8bd2-7ffba4d1b339" >
+		<logger level="INFO" doc:name="Log Start Get Transactions Details" doc:id="329c36d1-e22a-4506-9661-7a936ab30d02" message="Start Get Transactions Details" />
+		<flow-ref doc:name="ems-db-system-api:log:subflow" doc:id="4e1b6944-51a3-4949-bbf7-dbad38b4cce0" name="ems-db-system-api:log:subflow"/>
+		<flow-ref doc:name="impl-process-transactions-requests:get-transactions:subflow" doc:id="997cd57f-685b-4cbe-9a37-1b2d5d4fe6be" name="impl-process-transactions-requests:get-transactions:subflow" />
+		<logger level="INFO" doc:name="Log End Get Transactions Details" doc:id="7fc1916e-6027-43c9-a1aa-a26233643009" message="End Get Transactions Details" />
+		<error-handler ref="business-error-handler" />
+	</flow>
+	    <flow name="get:\students:ems-db-system-api-config" doc:id="fc43ff89-fef6-4aef-986f-8414fa8a4673">
+		<logger level="INFO" doc:name="Log Start Get Students Details" doc:id="d3253a07-5424-4bba-917b-da87832bc1c7" message="Start Get Students Details"/>
+		<flow-ref doc:name="ems-db-system-api:log:subflow" doc:id="ce69ca1e-11ff-4e26-9b1c-94b26773b7f1" name="ems-db-system-api:log:subflow"/>
+		<flow-ref doc:name="impl-process-students-requests:get-students:subflow" doc:id="5e98af90-98db-4f99-9612-6db8373a9f86" name="impl-process-students-requests:get-students:subflow"/>
+		<logger level="INFO" doc:name="Log End Get Students Details" doc:id="22e47a3e-ef57-4d44-95f9-f99f7b59584b" message="End Get Students Details"/>
+		<error-handler ref="business-error-handler" />
+    </flow>
+	<flow name="get:\students\guardians:ems-db-system-api-config" doc:id="d1ba22d8-b15c-48b6-b145-32c8927d4f6d" >
+		<logger level="INFO" doc:name="Log Start Get Guardians Details" doc:id="620fa057-75f3-4814-802e-2a4c7275a973" message="Start Get Guardians Details" />
+		<flow-ref doc:name="ems-db-system-api:log:subflow" doc:id="fc0f319f-3307-440a-a0a4-1c00cec9b011" name="ems-db-system-api:log:subflow" />
+		<flow-ref doc:name="impl-process-guardians-requests:get-guardians:subflow" doc:id="c2967a7e-7ce0-47dd-98b5-8bd76ebd79be" name="impl-process-guardians-requests:get-guardians:subflow"/>
+		<logger level="INFO" doc:name="Log End Get Guardians Details" doc:id="6836b7e6-5d99-45e1-a32d-6e0183f5c8db" message="End Get Guardians Details" />
+		<error-handler ref="business-error-handler" />
+	</flow>
+	<flow name="get:\students\enrolments:ems-db-system-api-config" doc:id="b77a4c29-1f78-477b-bee3-51c342e6f2fe" >
+		<logger level="INFO" doc:name="Log Start Get Enrolments Details" doc:id="cffdcc83-14be-4400-8c39-1af8b2c78cb2" message="Start Get Enrolments Details"/>
+		<flow-ref doc:name="ems-db-system-api:log:subflow" doc:id="4825b44e-72fe-42ea-868e-c85ee7dc386a" name="ems-db-system-api:log:subflow"/>
+		<flow-ref doc:name="impl-process-sites-requests:get-sites:subflow" doc:id="05ed5810-11ee-4237-bf8e-7386c0068ba1" name="impl-process-enrolments-requests:get-enrolments:subflow"/>
+		<logger level="INFO" doc:name="Log End Get Enrolments Details" doc:id="d5278c25-3d34-4695-902a-94e858c3beb9" message="End Get Enrolments Details"/>
+		<error-handler ref="business-error-handler" />
+	</flow>
+	<sub-flow name="ems-db-system-api:log:subflow" doc:id="d283d4ba-16dd-4b4e-9c23-89260904792c" >
+		<logger level="INFO" doc:name="Logging Query Parameters and Headers" doc:id="395221bc-480a-4ffa-a46a-de2b61cbfb33" message="Logging Query Parameters and Headers"/>
+		<logger level="INFO" doc:name="Log Query Parameters" doc:id="21614f37-7136-4e24-ae5f-eb3aaeb35e5b" message='#[attributes.queryParams]' />
+		<logger level="INFO" doc:name="Log Headers Parameters" doc:id="76a7a654-eac2-41e5-aad2-30bddfb11c1c" message="#[attributes.headers]" />
+	</sub-flow>
+</mule>

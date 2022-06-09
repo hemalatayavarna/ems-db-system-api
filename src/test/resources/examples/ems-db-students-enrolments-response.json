@@ -1,0 +1,48 @@
+[
+	{
+        "Enrolment_Status_ID": "Y",
+        "EDID": "105871203K",
+        "FTE": 1.00,
+        "Multiple_Enrolment_RN": 1,
+        "Org_Unit_ID": "0160",
+        "School_Name": "Greenock Primary School",
+        "Last_Updated_On": {
+            "minutesOffset": 0,
+            "timestamp": "2022-03-30T11:57:16.7183548"
+        },
+        "Year_Level": "Year 06",
+        "Date_Enrolled": "2016-02-01",
+        "Date_Left": null
+    },
+    {
+        "Enrolment_Status_ID": "Y",
+        "EDID": "105871412X",
+        "FTE": 1.00,
+        "Multiple_Enrolment_RN": 1,
+        "Org_Unit_ID": "0160",
+        "School_Name": "Greenock Primary School",
+        "Last_Updated_On": {
+            "minutesOffset": 0,
+            "timestamp": "2022-03-30T11:57:16.7183548"
+        },
+        "Year_Level": "Year 06",
+        "Date_Enrolled": "2016-02-01",
+        "Date_Left": null
+    },
+    {
+        "Enrolment_Status_ID": "Y",
+        "EDID": "105871909M",
+        "FTE": 1.00,
+        "Multiple_Enrolment_RN": 1,
+        "Org_Unit_ID": "0160",
+        "School_Name": "Greenock Primary School",
+        "Last_Updated_On": {
+            "minutesOffset": 0,
+            "timestamp": "2022-03-30T11:57:16.7183548"
+        },
+        "Year_Level": "Year 06",
+        "Date_Enrolled": "2016-02-01",
+        "Date_Left": null
+    }
+ 
+]

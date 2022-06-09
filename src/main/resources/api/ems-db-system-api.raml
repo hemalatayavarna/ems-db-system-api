@@ -1,0 +1,154 @@
+#%RAML 1.0
+title: EMS System API
+version: v1
+protocols:
+  - HTTP
+  - HTTPS
+mediaType: application/json
+traits:
+  pageable:
+    queryParameters:
+      page:
+        displayName: The Page Number of the list of Records
+        type: number
+        format: int
+        required: false
+        default: 1
+      limit:
+        displayName: Number of Records present in each Page
+        type: number
+        format: int
+        required: false
+        default: 0
+  sourceIdHeader:
+    headers:
+      X-Source-Id:
+        displayName: X-Source-Id
+        type: string
+        description: Source of the request
+        required: false
+  lastUpdatedOn: 
+    queryParameters:
+      last-updated-on:
+        displayName: Time from last update
+        required: false
+        type: datetime-only
+  acceptTypeHeader:
+    headers:
+      Accept:
+        displayName: Retrive the Content Type for Conversion
+        required: false
+        type: string
+        default: application/json
+        
+/health:
+  get:
+    displayName: Get Health
+    description: Return message to indicate the system health status
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include examples/health-example.json
+/reports:
+  /trial-balance:
+    get:
+      is:
+        - pageable
+        - sourceIdHeader
+      displayName: Finance Trial Balance
+      description: Retrieves Trial Balance data from the EMS DB
+      queryParameters:
+        year:
+          displayName: GL Balance Year
+          type: number
+          format: int
+          required: true
+        period:
+          displayName: GL Balance year's month
+          type: number
+          format: int
+          required: true
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include examples/ems-db-api-trial-balance-example.json
+    /transactions:
+      get:
+        is:
+          - pageable
+          - sourceIdHeader
+        displayName: Finance Trial Balance's Transaction
+        description: >-
+          Retrieves Transaction data from the EMS DB for the particular Trial
+          Balance
+        queryParameters:
+          reporting-unit:
+            displayName: The Reporting Unit
+            type: string
+            required: true
+          year:
+            displayName: The Fiscal year
+            type: number
+            format: int
+            required: true
+          object-code:
+            type: array
+            displayName: The Object Code
+            required: true
+        responses:
+          200:
+            body:
+              application/json:
+                example: !include examples/ems-db-api-transactions-example.json
+/students:
+  get:
+    is:
+      - pageable
+      - sourceIdHeader
+      - lastUpdatedOn
+      - acceptTypeHeader
+    displayName: Student data
+    description: Retrieve students data from EMS DB
+    responses:
+      200:
+        body:
+          application/json:
+            example: !include examples/get-ems-db-students-api-valid-response-json.json
+          application/csv:
+            example: !include examples/get-ems-db-students-api-valid-response-csv.csv
+  /guardians:
+    get:
+      is:
+        - pageable
+        - sourceIdHeader
+        - lastUpdatedOn
+        - acceptTypeHeader
+      displayName: Students Guardian Data
+      description: Retreive Students Guardian Data from EMS DB
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include examples/get-ems-db-students-guardians-valid-response-json.json
+            application/csv:  
+              example: !include examples/get-ems-db-students-guardians-valid-response-csv.csv
+                  
+       
+  /enrolments:
+    get:
+      is:
+        - pageable
+        - sourceIdHeader
+        - lastUpdatedOn
+        - acceptTypeHeader
+      displayName: Students Sites Data
+      description: Retreive Students Sites Data from EMS DB
+      responses:
+        200:
+          body:
+            application/json:
+              example: !include examples/get-ems-db-students-sites-valid-response-json.json
+            application/csv:
+              example: !include examples/get-ems-db-students-sites-valid-response-csv.csv 

@@ -1,0 +1,42 @@
+{
+	"_meta": {
+		"pageNumber": 1,
+		"limit": 2,
+		"totalRecords": 2,
+		"totalPages": 1
+	},
+	"payload": [
+		{
+			"month": "202109",
+			"scenario": "ACT",
+			"consolidationNode": "99",
+			"reportingUnit": "0325",
+			"localAccount": "0000-0000-1101-06",
+			"icRelatedParties": "TP",
+			"investmentCost": "99",
+			"glSource": "EMS",
+			"layer": "01",
+			"movement": "99_CLO",
+			"localAccountCategory": "01",
+			"localTrialBalances": 11818.53,
+			"localAccountCode": "1101",
+			"localAccountDescription": "BANK ACCOUNT- OPERATING"
+		},
+		{
+			"month": "202109",
+			"scenario": "ACT",
+			"consolidationNode": "99",
+			"reportingUnit": "0325",
+			"localAccount": "0000-0000-1102-06",
+			"icRelatedParties": "TP",
+			"investmentCost": "99",
+			"glSource": "EMS",
+			"layer": "01",
+			"movement": "99_CLO",
+			"localAccountCategory": "01",
+			"localTrialBalances": -5866.16,
+			"localAccountCode": "1102",
+			"localAccountDescription": "BANK ACCOUNT- SASIF"
+		}
+	]
+}

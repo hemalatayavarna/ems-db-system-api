@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:workday="http://www.mulesoft.org/schema/mule/workday"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:munit="http://www.mulesoft.org/schema/mule/munit"
+	xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd
+http://www.mulesoft.org/schema/mule/workday http://www.mulesoft.org/schema/mule/workday/current/mule-workday.xsd">
+	<munit:config name="error-handling-unit-test.xml" />
+	<munit:before-test name="error-handling-unit-test:Before_Test" doc:id="051f988d-e6a1-4690-9064-9c2cb2733555" >
+		<munit-tools:mock-when doc:name="Mock Async" doc:id="c45c8d0a-fba4-4886-b095-20ca4375c5a1" processor="async">
+			<munit-tools:with-attributes >
+				<munit-tools:with-attribute whereValue="Async" attributeName="doc:name" />
+			</munit-tools:with-attributes>
+
+			</munit-tools:mock-when>
+		<munit-tools:mock-when doc:name="Mock Publish to Error MQ" doc:id="7dce91e9-b227-48fa-a5e0-7d0c5b9d2476" processor="jms:publish">
+			<munit-tools:with-attributes >
+				<munit-tools:with-attribute whereValue="Publish To Error MQ" attributeName="doc:name" />
+			</munit-tools:with-attributes>
+		</munit-tools:mock-when>
+	</munit:before-test>
+	<flow name="error-handling-unit-test:wrapper:flow" doc:id="6f4cb289-44a4-406c-9061-6856bb563735" >
+		<flow-ref doc:name="ems-db-system-api-main" doc:id="6db230cc-aa77-4666-b0bb-523903e1ed1b" name="ems-db-system-api-main"/>
+		<error-handler >
+			<on-error-continue enableNotifications="true" logException="true" doc:name="On Error Continue" doc:id="220ceeaf-f970-49bc-af2a-617accbe193e" >
+				<logger level="DEBUG" doc:name="Log Exception handled continue to Assert" doc:id="fff6d81b-450c-4299-91dc-0b3a88689c59" message="Exception Handled"/>
+			</on-error-continue>
+		</error-handler>
+	</flow>
+	
+	<munit:test name="error-handling-unit-test:bad-request:test" description="MUnit Test" doc:id="e18c28ab-2e48-4bf0-bd8c-661f6df21dbd" tags="unit">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock API Kit Return APIKIT:BAD_REQUEST" doc:id="ca826a15-f385-4759-a120-94899836f0d1" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="ems-db-system-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:BAD_REQUEST" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="error-handling-unit-test:wrapper:flow" doc:id="84b10fa4-a048-4d41-9c4a-a09aee74c795" name="error-handling-unit-test:wrapper:flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that HTTP Status is 400" doc:id="33723789-b966-4bcc-ad4d-8a2e32408027" expression="#[vars.httpStatus]" is='#[MunitTools::equalTo(400)]' message="The HTTP Status is not Correct"/>
+			<munit-tools:verify-call doc:name="Verify call to Log Bad Request Error" doc:id="938a4e7f-29dc-4224-bb6d-1a5229024138" processor="mule:logger">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Log Bad Request Error" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	
+	<munit:test name="error-handling-unit-test:not-found:test" description="MUnit Test" doc:id="7de2b455-43f8-48e9-92f7-9577254a2769" tags="unit">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock API Kit Return APIKIT:NOT_FOUND" doc:id="6477db2f-29d5-4506-beae-834ec26454ff" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="ems-db-system-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_FOUND" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="error-handling-unit-test:wrapper:flow" doc:id="ee3fcaf7-34de-44dc-a49d-bba3062468b9" name="error-handling-unit-test:wrapper:flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that HTTP Status is 404" doc:id="7d81774e-0aff-4e5d-be9d-063fdad578b2" expression="#[vars.httpStatus]" is='#[MunitTools::equalTo(404)]' message="The HTTP Status is not Correct"/>
+			<munit-tools:verify-call doc:name="Verify call to Log Not Found Error" doc:id="1515df3d-d337-4177-b89c-a97af74eaa3b" processor="mule:logger">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Log Not Found Error" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	
+	<munit:test name="error-handling-unit-test:method-not-allowed:test" description="MUnit Test" doc:id="db659b9e-99e5-4bee-a29d-b80387a0c55e" tags="unit">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock API Kit Return APIKIT:METHOD_NOT_ALLOWED" doc:id="05a984fb-f505-4ff8-a534-2f5e798abdaf" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="ems-db-system-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:METHOD_NOT_ALLOWED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="error-handling-unit-test:wrapper:flow" doc:id="18a04f1f-2d11-47bb-aaaa-2f3ff1e9d02b" name="error-handling-unit-test:wrapper:flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that HTTP Status is 405" doc:id="36434252-4908-47f3-bbf9-85a3b9b532f7" expression="#[vars.httpStatus]" is='#[MunitTools::equalTo(405)]' message="The HTTP Status is not Correct"/>
+			<munit-tools:verify-call doc:name="Verify call to Log Method Not Allowed Error" doc:id="a7da112d-d948-40e9-9642-12efdf80a449" processor="mule:logger">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Log Method Not Allowed Error" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	
+	<munit:test name="error-handling-unit-test:not-acceptable:test" description="MUnit Test" doc:id="ab0dae48-04e7-40b0-bd95-1aca4143ee32" tags="unit">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock API Kit Return APIKIT:NOT_ACCEPTABLE" doc:id="1db4ad42-0b5f-4ef3-9060-ac5922a7afd4" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="ems-db-system-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_ACCEPTABLE" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="error-handling-unit-test:wrapper:flow" doc:id="8c81223b-407b-47a4-92f3-2166c1465f01" name="error-handling-unit-test:wrapper:flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that HTTP Status is 406" doc:id="de70ee8f-fe53-41ad-8bb4-93c52868eac6" expression="#[vars.httpStatus]" is='#[MunitTools::equalTo(406)]' message="The HTTP Status is not Correct"/>
+			<munit-tools:verify-call doc:name="Verify call to Log Not Acceptable Error" doc:id="b9d98995-bfaa-4e78-9e22-5ebf7a67eb93" processor="mule:logger">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Log Not Acceptable Error" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	
+	<munit:test name="error-handling-unit-test:unsupported-media-type:test" description="MUnit Test" doc:id="50ab49e3-a6e3-494b-b40d-30f67f250d81" tags="unit">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock API Kit Return APIKIT:UNSUPPORTED_MEDIA_TYPE" doc:id="823a7c88-a71c-409c-8025-dea642ad4362" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="ems-db-system-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:UNSUPPORTED_MEDIA_TYPE" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="error-handling-unit-test:wrapper:flow" doc:id="6de5fb9c-0fd5-46a5-872e-a66e3fbb96f7" name="error-handling-unit-test:wrapper:flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that HTTP Status is 415" doc:id="92769f98-5871-49aa-987e-900202bcbdc5" expression="#[vars.httpStatus]" is='#[MunitTools::equalTo(415)]' message="The HTTP Status is not Correct"/>
+			<munit-tools:verify-call doc:name="Verify call to Log Unsupported Media Type Error" doc:id="a4b82f91-019f-44dd-a5e6-58677b31f8b0" processor="mule:logger">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Log Unsupported Media Type Error" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	
+	<munit:test name="error-handling-unit-test:not-implemented:test" description="MUnit Test" doc:id="28c5a297-5955-469b-ac77-66798295cc45" tags="unit">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock API Kit Return APIKIT:NOT_IMPLEMENTED" doc:id="b6d42375-1e0f-45ab-8006-4b464f3e93ff" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="ems-db-system-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="APIKIT:NOT_IMPLEMENTED" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="error-handling-unit-test:wrapper:flow" doc:id="591aacdc-9ad7-4744-aa51-1b64a33ee61d" name="error-handling-unit-test:wrapper:flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that HTTP Status is 501" doc:id="d9b9f740-5e62-4966-9af7-957da0037781" expression="#[vars.httpStatus]" is='#[MunitTools::equalTo(501)]' message="The HTTP Status is not Correct"/>
+			<munit-tools:verify-call doc:name="Verify call to Log Not Implemented Error" doc:id="47e90021-b515-4213-99ed-feb1eac361fd" processor="mule:logger">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Log Not Implemented Error" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="error-handling-unit-test:any:test" description="MUnit Test" doc:id="f749451d-8eaf-44ef-94df-7971dadd7ba2" tags="unit">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock API Kit Return ANY" doc:id="8da83f89-792f-4d77-92dc-6c001aebb1ff" processor="apikit:router">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="ems-db-system-api-config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="ANY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="error-handling-unit-test:wrapper:flow" doc:id="ab1fd6fb-b6bd-4cb4-b55c-f18cfa2719b4" name="error-handling-unit-test:wrapper:flow"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that HTTP Status is 500" doc:id="34771d54-6411-4c11-9fc3-8f3434656365" expression="#[vars.httpStatus]" is='#[MunitTools::equalTo(500)]' message="The HTTP Status is not Correct"/>
+			<munit-tools:verify-call doc:name="Verify call to Log Unhandled Error" doc:id="ce7ca537-e60d-4e6e-9014-9bf9a13771db" processor="mule:logger">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute attributeName="doc:name" whereValue="Log Unhandled Error" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	
+	
+	<munit:test name="error-handling-unit-test:generic-error:test" description="MUnit Test" doc:id="4e46fc48-146f-4bd2-a3c1-7d150580e0f7" tags="unit">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock flow ref impl-process-trial-balance-requests:get-triabalance:subflow" doc:id="bf4e4110-0225-4509-83b1-7bf35bd569ca" processor="flow-ref">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="impl-process-trial-balance-requests:get-trialbalance:subflow" attributeName="doc:name" />
+					<munit-tools:with-attribute whereValue="impl-process-trial-balance-requests:get-triabalance:subflow" attributeName="name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="ANY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="get:\reports\trial-balance:ems-db-system-api-config" doc:id="9e88c901-1913-4019-9fe0-bf6db76b1753" name="get:\reports\trial-balance:ems-db-system-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:assert-that doc:name="Assert that HTTP Status is 500" doc:id="387465cd-8b87-474f-9cd6-e40e05060de1" expression="#[vars.httpStatus]" is='#[MunitTools::equalTo(500)]' message="The HTTP Status is not Correct"/>
+			<munit-tools:verify-call doc:name="Verify call Log Generic Error Message" doc:id="7f2ebf5a-5a16-4b69-9260-4a1f09c3f45f" processor="logger">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Log Generic Error Message" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="error-handling-unit-test:expression-error:test" doc:id="ec5d33a7-3ee7-4fef-bc25-366411c637ab" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Mock when DB SQL Expression" doc:id="1fad0c05-3fa5-46d9-acb6-7f284985566a" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Database_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:error typeId="EXPRESSION" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<flow-ref doc:name="get:\reports\trial-balance:ems-db-system-api-config" doc:id="0fce4c4d-65dd-40f6-b4b8-8a89576669f1" name="get:\reports\trial-balance:ems-db-system-api-config" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call Log Expression Error" doc:id="789a70e8-068d-4a0b-921b-fc27397961af" processor="logger">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Log Expression Error Message" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="error-handling-unit-test:db-connectivity-error:test" doc:id="8fc74510-80e1-4c63-b37c-3349fca88915">
+		<munit:behavior>
+			<munit-tools:mock-when doc:name="Mock when DB  Connection" doc:id="33dcd68b-5726-4b7d-b0ef-d2c4bee15a79" processor="db:select">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Database_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return>
+					<munit-tools:error typeId="DB:CONNECTIVITY" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution>
+			<munit:set-event doc:name="Set Event" doc:id="adb2fe7c-1378-4059-8b86-d39c98ea3f57" >
+				<munit:attributes value="#[MunitTools::getResourceAsString('examples/get-ems-db-transactions-api-valid-query-params.json')]" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="get:\reports\trial-balance\transactions:ems-db-system-api-config" doc:id="a296465a-162b-430e-8019-9c9c322cd54a" name="get:\reports\trial-balance\transactions:ems-db-system-api-config" />
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:name="Verify call DB connectivity" doc:id="fe281f60-9d76-470a-aa6d-b098c2205081" processor="logger">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Log DB Connectivity Error Message" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+
+
+</mule>

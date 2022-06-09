@@ -1,0 +1,34 @@
+[
+	{
+		"LocalAccount": "0000-0000-1101-06",
+		"Month": 202109,
+		"Scenario": "ACT",
+		"ConsolidationNode": "99",
+		"IcRelatedParties": "TP",
+		"InvestmentCost": "99",
+		"GlSource": "EMS",
+		"Layer": "01",
+		"Movement": "99_CLO",
+		"LocalAccountCategory": "01",
+		"LocalTrialBalances": 11818.53,
+		"ReportingUnit": "0325",
+		"LocalAccountCode": "1101",
+		"LocalAccountDescription": "BANK ACCOUNT- OPERATING"
+	},
+	{
+		"LocalAccount": "0000-0000-1102-06",
+		"Month": 202109,
+		"Scenario": "ACT",
+		"ConsolidationNode": "99",
+		"IcRelatedParties": "TP",
+		"InvestmentCost": "99",
+		"GlSource": "EMS",
+		"Layer": "01",
+		"Movement": "99_CLO",
+		"LocalAccountCategory": "01",
+		"LocalTrialBalances": -5866.16,
+		"ReportingUnit": "0325",
+		"LocalAccountCode": "1102",
+		"LocalAccountDescription": "BANK ACCOUNT- SASIF"
+	}
+]

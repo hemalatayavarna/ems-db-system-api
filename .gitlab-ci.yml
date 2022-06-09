@@ -1,0 +1,23 @@
+include:
+  - project: 'd4e/tools/build/gitlab-ci-template'
+    ref: master
+    file: '/templates/.gitlab-ci-template-build.yml'
+
+variables:
+  BASE_IMAGE: ${INFRA_CONTAINER_REGISTRY}/tools/build/docker-mule-runtime/4-3-0-20210119:20210312.83
+  APP_NAME: "ems-db-system-api"
+  INTERNAL_PORT: 8091
+  POM_DIR: "."
+  JAR_VERSION: 1.0.0-SNAPSHOT
+  JAR_NAME: $POM_DIR/target/ems-db-system-api-$JAR_VERSION-mule-application.jar
+  HEALTH_PATH: "/api/v1/health"
+  COMPONENT: "ems-db-system-api"
+  APP_VERSION: "1.0.0"
+  LIVENESS_INITIAL_DELAY: 50
+  LIVENESS_TIMEOUT: 50
+  LIVENESS_PERIOD: 50
+  READINESS_INITIAL_DELAY: 50
+  READINESS_TIMEOUT: 50
+  READINESS_PERIOD: 50 
+  TRACE: "true"
+  

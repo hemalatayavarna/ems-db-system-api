@@ -1,0 +1,215 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<sub-flow name="impl-process-students-requests:get-students:subflow" doc:id="859ae6f7-2252-471f-a8c2-f4abc9de8e0d" >
+		<logger level="INFO" doc:name="Log Start Get Students Implementation" doc:id="360162b7-5f44-4f91-8160-01b9530e7e64" message="Start Get Students Implementation" />
+		<ee:transform doc:name="Set Variables: lastUpdatedOn,offset, limit, page, format" doc:id="7746616f-d855-4f76-b41a-639defe0f013">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="lastUpdatedOn"><![CDATA[%dw 2.0
+output application/java
+---
+attributes.queryParams.'last-updated-on']]></ee:set-variable>
+				<ee:set-variable variableName="page"><![CDATA[%dw 2.0
+output application/java
+---
+trim(attributes.queryParams.page) as Number default 1]]></ee:set-variable>
+				<ee:set-variable variableName="limit"><![CDATA[%dw 2.0
+output application/java
+---
+trim(attributes.queryParams.limit) as Number default 1]]></ee:set-variable>
+				<ee:set-variable variableName="offset"><![CDATA[%dw 2.0
+output application/java
+---
+(trim(attributes.queryParams.page) - 1)*trim(attributes.queryParams.limit)]]></ee:set-variable>
+				<ee:set-variable variableName="format"><![CDATA[%dw 2.0
+import p from Mule
+output application/java
+---
+if ( attributes.headers.'Accept' == p('accept.contentType.csv') ) {
+	value: p('response.contentType.csv')
+}
+else
+{
+	value: p('response.contentType.json')
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="sys-ems-database:get-students-data:subflow" doc:id="fde1e6f1-36e0-41ab-a953-32b66b30280b" name="system-ems-database:get-students:subflow" />
+		<ee:transform doc:name="Transform to Students CDM" doc:id="c19fbe62-a934-42fc-b682-8ef51a12c5b8">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+import p from Mule
+import getGender from modules::getAllFunctions
+import setTrueOrFalse from modules::getAllFunctions
+import getEmsYearLevel from modules::getAllFunctions
+---
+payload map ( item , index ) -> {
+	edId: item.EDID,
+	orgUnitId: item.Org_Unit_ID,
+	lastName: item.Last_Name,
+	middleName: item.Middle_Name,
+	firstName: item.First_Name,
+	preferredName: item.Preferred_Name,
+	gender: getGender(item.Gender_ID),
+	birthDate: item.Birth_Date,
+	yearLevel: getEmsYearLevel(item.Year_Level),
+	isDisable: setTrueOrFalse(item.Disability_Status_ID),
+	cypc: setTrueOrFalse(item.CYPC_ID),
+	iesFlag: setTrueOrFalse(item.IsInternationalStudent),
+	hasCustodyOrder: setTrueOrFalse(item.HasCustodyOrder),
+	hasInterventionOrder: setTrueOrFalse(item.HasInterventionOrder),
+	birthCountry: item.Birth_Country,
+	lastUpdatedOn: item.Last_Updated_On.timestamp
+}
+]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="readDWLFile"><![CDATA[%dw 2.0
+output application/java
+var fileName="modules/$(vars.format.value).dwl"
+---
+readUrl("classpath://" ++ fileName, 'text/plain')]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:dynamic-evaluate doc:name="Dynamic Evaluate Content Type" doc:id="113eb841-ce66-4187-8b22-4c61d0a1c0a7" expression="#[vars.readDWLFile]" />
+		<logger level="INFO" doc:name="Log End Get Students Implementation" doc:id="0128921a-c09e-46e6-9983-fe6ccf2fdf25" message="End Get Students Implementation" />
+	</sub-flow>
+	<sub-flow name="impl-process-guardians-requests:get-guardians:subflow" doc:id="3db12405-c793-4e8f-ae1d-6509a1aaa52a">
+		<logger level="INFO" doc:name="Log Start Get Guardians Implementation" doc:id="97c02cd3-67be-44df-acff-632e51c1a49a" message="Start Get Guardians Implementation" />
+		<ee:transform doc:name="Set Variables: lastUpdatedOn,offset, limit, page, format, edid" doc:id="d72b0de1-31f6-48c5-aa56-64cc23161ec8">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="lastUpdatedOn"><![CDATA[%dw 2.0
+output application/java
+---
+attributes.queryParams.'last-updated-on']]></ee:set-variable>
+				<ee:set-variable variableName="page"><![CDATA[%dw 2.0
+output application/java
+---
+trim(attributes.queryParams.page) as Number default 1]]></ee:set-variable>
+				<ee:set-variable variableName="limit"><![CDATA[%dw 2.0
+output application/java
+---
+trim(attributes.queryParams.limit) as Number default 1]]></ee:set-variable>
+				<ee:set-variable variableName="offset"><![CDATA[%dw 2.0
+output application/java
+---
+(trim(attributes.queryParams.page) - 1)*trim(attributes.queryParams.limit)]]></ee:set-variable>
+				<ee:set-variable variableName="format"><![CDATA[%dw 2.0
+import p from Mule
+output application/java
+---
+if ( attributes.headers.'Accept' == p('accept.contentType.csv') ) {
+	value: p('response.contentType.csv')
+}
+else
+{
+	value: p('response.contentType.json')
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="system-ems-database:get-guardians:subflow" doc:id="8852cdb4-da73-4e52-8522-62c7bce408d4" name="system-ems-database:get-guardians:subflow" />
+		<ee:transform doc:name="Transform to Guardians CDM" doc:id="5901a1f8-8fc8-41ad-bdcc-8177ae08f36c">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+import setTrueOrFalse from modules::getAllFunctions
+---
+payload map(item,index) -> {
+	edId: item.EDID,
+	guardianId: item.Family_Parent_Guardian_ID,
+    guardianSalutation: item.Family_Parent_Guardian_Salutation,
+    guardianLastName: item.Family_Parent_Guardian_Last_Name,
+    guardianFirstName: item.Family_Parent_Guardian_First_Name,
+    guardianPhone: item.Family_Parent_Guardian_Phone,
+    guardianMobile: item.Family_Parent_Guardian_Mobile,
+    guardianEmail: item.Family_Parent_Guardian_Email,
+    lastUpdatedOn: item.Last_Updated_On.timestamp
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="readDWLFile"><![CDATA[%dw 2.0
+output application/java
+var fileName="modules/$(vars.format.value).dwl"
+---
+readUrl("classpath://" ++ fileName, 'text/plain')]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:dynamic-evaluate doc:name="Dynamic Evaluate Content Type" doc:id="1b6b4774-358d-42ff-84bd-f87bd6a34095" expression="#[vars.readDWLFile]" />
+		<logger level="INFO" doc:name="Log End Get Guardians Implementation" doc:id="3d70fa75-d89c-4974-bf13-11a08c517b7c" message="End Get Guardians Implementation" />
+	</sub-flow>
+	<sub-flow name="impl-process-enrolments-requests:get-enrolments:subflow" doc:id="8301de21-2e4b-4916-a154-2fcc76741b89" >
+		<logger level="INFO" doc:name="Log Start Get Enrolments Implementation" doc:id="411eaeb9-e71e-4a23-8d2f-f631d988abcf" message="Start Get Enrolments Implementation"/>
+		<ee:transform doc:name="Set Variables: lastUpdatedOn,offset, limit, page, format, edid" doc:id="f8c28328-309f-46ed-872c-ff4db8307fc3">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="lastUpdatedOn"><![CDATA[%dw 2.0
+output application/java
+---
+attributes.queryParams.'last-updated-on']]></ee:set-variable>
+				<ee:set-variable variableName="page"><![CDATA[%dw 2.0
+output application/java
+---
+trim(attributes.queryParams.page) as Number default 1]]></ee:set-variable>
+				<ee:set-variable variableName="limit"><![CDATA[%dw 2.0
+output application/java
+---
+trim(attributes.queryParams.limit) as Number default 1]]></ee:set-variable>
+				<ee:set-variable variableName="offset"><![CDATA[%dw 2.0
+output application/java
+---
+(trim(attributes.queryParams.page) - 1)*trim(attributes.queryParams.limit)]]></ee:set-variable>
+				<ee:set-variable variableName="format"><![CDATA[%dw 2.0
+import p from Mule
+output application/java
+---
+if ( attributes.headers.'Accept' == p('accept.contentType.csv') ) {
+	value: p('response.contentType.csv')
+}
+else
+{
+	value: p('response.contentType.json')
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="system-ems-database:get-enrolments:subflow" doc:id="7c0111b7-f930-461e-a83f-1ab852fddeee" name="system-ems-database:get-enrolments:subflow"/>
+		<ee:transform doc:name="Transform to Enrolments CDM" doc:id="321d0414-8fda-4055-81d3-23f9f1bc8816">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/java
+import setTrueOrFalse from modules::getAllFunctions
+import getEmsYearLevel from modules::getAllFunctions	
+---
+payload map (item, index) ->{
+	edId: item.EDID,
+	isPrimary: setTrueOrFalse(item.Multiple_Enrolment_RN),
+	schoolName: item.School_Name,
+	fte: item.FTE,
+	studentRowNumber: item.Multiple_Enrolment_RN,
+	enrolmentEndDate: item.Date_Left,
+	enrolmentStartDate: item.Date_Enrolled,
+	studentStatus: item.Enrolment_Status_ID,
+	orgUnitId: item.Org_Unit_ID,
+	yearLevel: getEmsYearLevel(item.Year_Level),
+	lastUpdatedOn: item.Last_Updated_On.timestamp,
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables>
+				<ee:set-variable variableName="readDWLFile"><![CDATA[%dw 2.0
+output application/java
+var fileName="modules/$(vars.format.value).dwl"
+---
+readUrl("classpath://" ++ fileName, 'text/plain')]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:dynamic-evaluate doc:name="Dynamic Evaluate Content Type" doc:id="3a88cab3-ebb6-48d7-9312-0a285193026b" expression="#[vars.readDWLFile]" >
+		</ee:dynamic-evaluate>
+		<logger level="INFO" doc:name="Log End Get Enrolments Implementation" doc:id="92a4a84b-881b-4566-acd0-c651ab70b9a7" message="End Get Enrolments Implementation"/>
+	</sub-flow>
+
+</mule>

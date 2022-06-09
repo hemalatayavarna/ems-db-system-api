@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:apikit="http://www.mulesoft.org/schema/mule/mule-apikit"
+	xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/mule-apikit http://www.mulesoft.org/schema/mule/mule-apikit/current/mule-apikit.xsd 
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd 
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd 
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+<apikit:config name="ems-db-system-api-config" api="ems-db-system-api.raml" outboundHeadersMapName="outboundHeaders" httpStatusVarName="httpStatus" />
+<db:config name="Database_Config" doc:name="Database Config" doc:id="54a6b218-d8c5-42ac-9987-fcec791c323c" >
+		<db:mssql-connection host="${ems.db.host}" port="${ems.db.port}" user="${secure::ems.db.username}" password="${secure::ems.db.password}" databaseName="${secure::ems.db.name}" >
+			<reconnection >
+				<reconnect-forever frequency="${ems.db.reconnection.frequency}" />
+			</reconnection>
+		</db:mssql-connection>
+	</db:config>
+	    <http:listener-config name="ems-system-api-httpListenerConfig">
+        <http:listener-connection host="${http.private.host}" port="${http.private.port}" readTimeout="${http.read.timeout}" connectionIdleTimeout="${http.connection.idle.timeout}"/>
+    </http:listener-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="59ac5be8-a5ba-4c22-9e53-18278bf8f003" file="config\app-config-${env}.properties" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="d054485d-6153-4565-88ac-cae479e147eb" file="config\app-config-${env}.properties" key="${secure.key}">
+		<secure-properties:encrypt algorithm="Blowfish" />
+	</secure-properties:config>
+	<jms:config name="JMS_Config_Topic" doc:name="JMS Config" doc:id="2f691339-3754-4f25-bae4-83c417778056" >
+		<jms:generic-connection specification="JMS_2_0" username="${mq.broker.username}" password="${mq.broker.password}">
+			<reconnection>
+				<reconnect-forever frequency="${mq.reconnection.frequency}" />
+			</reconnection>
+			<jms:connection-factory >
+				<jms:jndi-connection-factory connectionFactoryJndiName="ConnectionFactory">
+					<jms:name-resolver-builder jndiInitialContextFactory="org.apache.activemq.artemis.jndi.ActiveMQInitialContextFactory" jndiProviderUrl="${mq.broker.url}" />
+				</jms:jndi-connection-factory>
+			</jms:connection-factory>
+		</jms:generic-connection>
+		<jms:consumer-config >
+			<jms:consumer-type >
+				<jms:topic-consumer shared="true" />
+			</jms:consumer-type>
+		</jms:consumer-config>
+		<jms:producer-config persistentDelivery="true" timeToLive="${mq.timetolive}" priority="${mq.priority}"/>
+	</jms:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="29160f6b-b151-4edf-9dd0-8054400b6db4" file="config/app-config-global.properties" />
+	<db:config name="Database_Config_EMS_Student" doc:name="Database Config" doc:id="63267b01-699f-46bf-aa72-4e620b7b01f3" >
+		<db:mssql-connection host="${ems.db.host}" port="${ems.db.port}" user="${secure::ems.db.username}" password="${secure::ems.db.password}" databaseName="${secure::ems.db.students.server.name}" />
+	</db:config>
+
+</mule>
+	

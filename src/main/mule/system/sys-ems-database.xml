@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
+	<sub-flow name="system-ems-database:get-trialbalance:subflow" doc:id="40c567a8-d293-4387-b963-8eeb6867a1ed" >
+		<logger level="INFO" doc:name="Log Start EMS Database Trial Balance" doc:id="99669c62-0d6a-4282-b437-6385b7255ef1" message="Log Start EMS Database Trial Balance"/>
+		<ee:transform doc:name="Set SQL Query" doc:id="5ba1d0d4-e85e-44b3-a1ed-ff37e5299a60" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="sqlQuery" ><![CDATA[%dw 2.0
+output application/java
+---
+'SELECT [YearId]
+      ,[MonthId]
+      ,[Month]
+      ,[Scenario]
+      ,[ConsolidationNode]
+      ,[ReportingUnit]
+      ,[LocalAccount]
+      ,[IcRelatedParties]
+      ,[InvestmentCost]
+      ,[GlSource]
+      ,[Layer]
+      ,[Movement]
+      ,[LocalTrialBalances]
+      ,[LocalAccountCode]
+      ,[LocalAccountDescription]
+      ,[LocalAccountCategory]
+  FROM [dbo].[vw_GLBalances]
+  WHERE YearId=$(vars.year) and MonthId=$(vars.month)
+ORDER BY KeyValue
+OFFSET $(vars.offset) ROWS FETCH NEXT $(vars.sqlQueryLimit) ROWS ONLY']]></ee:set-variable>
+				<ee:set-variable variableName="sqlQueryLog" ><![CDATA[%dw 2.0
+output application/java
+---
+'Query Parameters for the TB SQL Query: YearId=$(vars.year) and MonthId=$(vars.month)
+ORDER BY KeyValue
+OFFSET $(vars.offset) ROWS FETCH NEXT $(vars.sqlQueryLimit) ROWS ONLY']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Log SQL Query Params" doc:id="2132f818-ada7-4b72-ad36-52a35060e501" message="#[vars.sqlQueryLog]"/>
+		<db:select doc:name="Select Trial Balance" doc:id="7b3b6491-d4f5-45e0-b81c-105e7400add5" config-ref="Database_Config" queryTimeout="${ems.db.select.timeout}">
+			<reconnect-forever frequency="${ems.db.reconnection.frequency}" />
+			<db:sql ><![CDATA[#[vars.sqlQuery]]]></db:sql>
+		</db:select>
+		<logger level="INFO" doc:name="Log End EMS Database Trial Balance" doc:id="b4a4a424-af1c-49de-9e35-4b92a96239dc" message="Log End EMS Database Trial Balance"/>
+	</sub-flow>
+	<sub-flow name="system-ems-database:get-transactions:subflow" doc:id="820f1b30-c513-40f4-86b1-c9083c81376e" >
+		<logger level="INFO" doc:name="Log Start EMS Database Transactions" doc:id="b801bac3-d4a0-43fc-83e9-7fffb34a1c95" message="Log Start EMS Database Transactions" />
+		<ee:transform doc:name="Set SQL Query" doc:id="3bd4fc9c-2ef4-438f-acb5-764b982a0b10" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="sqlQuery" ><![CDATA[%dw 2.0
+output application/java
+---
+' SELECT [GlYear]
+      ,[GlMonth]
+      ,[JournalId]
+	  ,[TransactionDescription]     
+      ,[AccountNumber]
+      ,[ObjectCodeAccountNumberSegment]
+      ,[AccountDescription]
+      ,[Amount]
+      ,[ReportingUnit]      
+      ,[CompanyNumber]
+  FROM [dbo].[vw_GLTransactions]
+  WHERE GlYear=$(vars.sqlQueryParams.year) and [ObjectCodeAccountNumberSegment] IN ($(vars.sqlQueryParams.objectCode)) and ReportingUnit=$(vars.sqlQueryParams.reportingUnit)
+ORDER BY KeyValue
+OFFSET $(vars.sqlQueryParams.offset) ROWS FETCH NEXT $(vars.sqlQueryLimit) ROWS ONLY']]></ee:set-variable>
+				<ee:set-variable variableName="sqlQueryLog" ><![CDATA[%dw 2.0
+output application/java
+---
+'Query Parameters for the DT SQL Query: GlYear=$(vars.sqlQueryParams.year) and [ObjectCodeAccountNumberSegment] IN ($(vars.sqlQueryParams.objectCode)) and ReportingUnit=$(vars.sqlQueryParams.reportingUnit)
+ORDER BY KeyValue
+OFFSET $(vars.sqlQueryParams.offset) ROWS FETCH NEXT $(vars.sqlQueryLimit) ROWS ONLY']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Log SQL Query Params" doc:id="2b8a9455-8e87-4eac-98d9-da6d98577434" message="#[vars.sqlQueryLog]"/>
+		<db:select doc:name="Select Transactions" doc:id="1264cc3a-1ed0-49b9-bedb-59d152934f06" config-ref="Database_Config" queryTimeout="${ems.db.select.timeout}" >
+			<reconnect-forever frequency="${ems.db.reconnection.frequency}" />
+			<db:sql ><![CDATA[#[vars.sqlQuery]]]></db:sql>
+		</db:select>
+		<logger level="INFO" doc:name="Log End EMS Database Transactions" doc:id="3ec048de-3390-4dff-bdf3-12ca705ffa4d" message="Log End EMS Database Transactions" />
+	</sub-flow>
+	<sub-flow name="system-ems-database:get-students:subflow" doc:id="0bfd9bb3-d0cb-4143-8c90-a1d5727994d9" >
+		<logger level="INFO" doc:name="Log Start EMS Database" doc:id="1a980241-5008-4e77-9d90-a6bf81589f5f" message="Start EMS Database" />
+		<ee:transform doc:name="Set Variable: sqlQuery" doc:id="26bb2c1f-b7a1-46bd-8f34-46a91602f462">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable resource="dwl/ems-students-query.dwl" variableName="sqlQuery" />
+			</ee:variables>
+		</ee:transform>
+		<db:select doc:name="Select Student Enrolement" doc:id="3c65dd1c-fad0-4102-960f-076bdae8a0a2" config-ref="Database_Config_EMS_Student" queryTimeout="${ems.db.select.timeout}" >
+			<reconnect-forever frequency="${ems.db.reconnection.frequency}" />
+			<db:sql ><![CDATA[#[vars.sqlQuery]]]></db:sql>
+		</db:select>
+		<logger level="INFO" doc:name="Log End EMS Database" doc:id="e74bb277-b71f-4678-9cff-e9d37abbc501" message="End EMS Database" />
+	</sub-flow>
+	<sub-flow name="system-ems-database:get-guardians:subflow" doc:id="a7366da2-81c7-40fe-b1cb-e7a8c94dff1e">
+		<logger level="INFO" doc:name="Log Start EMS Database" doc:id="75745fb8-48f6-4081-9c05-28df2d900df8" message="Start EMS Database" />
+		<ee:transform doc:name="Set Variable: sqlQuery" doc:id="72e895b7-c523-4204-8c8d-b1fb0240426c">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable resource="dwl/ems-guardians-query.dwl" variableName="sqlQuery" />
+			</ee:variables>
+		</ee:transform>
+		<db:select doc:name="Select Guardian Enrolement" doc:id="0964b7fe-0b97-4adb-9f89-feedcf4fb6e9" config-ref="Database_Config_EMS_Student" queryTimeout="${ems.db.select.timeout}">
+			<reconnect-forever frequency="${ems.db.reconnection.frequency}" />
+			<db:sql ><![CDATA[#[vars.sqlQuery]]]></db:sql>
+		</db:select>
+		<logger level="INFO" doc:name="Log End EMS Database" doc:id="54102c2a-69b6-47be-a2d1-3bf6ffbc2246" message="End EMS Database" />
+	</sub-flow>
+	<sub-flow name="system-ems-database:get-enrolments:subflow" doc:id="b0c2f178-b3c6-457a-905b-90e96b3ac01b" >
+		<logger level="INFO" doc:name="Log Start EMS Database" doc:id="022bbc81-beee-49d7-b390-32099020b5ea" message="Start EMS Database"/>
+		<ee:transform doc:name="Set Variable: sqlQuery" doc:id="dfac2c45-8a4f-4881-bb62-9f60a1805815">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable resource="dwl/ems-students-sites-query.dwl" variableName="sqlQuery" />
+			</ee:variables>
+		</ee:transform>
+		<db:select doc:name="Select Sites Enrolement" doc:id="c63d060f-88dc-4e6d-be7c-7f2b78db2eab" config-ref="Database_Config_EMS_Student">
+			<db:sql ><![CDATA[WITH vw_INTEGRATION_Affiliate AS(
+SELECT st.EDID AS 'EDID',
+		s.ExternalCode AS 'Org_Unit_ID',
+		s.Name AS 'School_Name',
+		CASE WHEN e.EDED < GETDATE() THEN 'N' ELSE 'Y' END AS 'Enrolment_Status_ID',
+		CASE WHEN ay.[Description] = 'Prep' THEN 'Reception' ELSE ay.Description END AS 'Year_Level',
+		e.ESD AS 'Date_Enrolled',
+		e.EDED AS 'Date_Left',
+		e.FTE AS 'FTE',
+		e.StuRank AS 'Multiple_Enrolment_RN',
+		(SELECT MAX(v) FROM (VALUES (e.UpdatedDate),(s.UpdatedDate),(p.UpdatedDate),(ay.UpdatedDate)) as value(v)) as 'Last_Updated_On'
+FROM Student st
+LEFT JOIN Person p ON p.PersonId=st.PersonId
+LEFT JOIN CountryLookup pc ON p.CountryID=pc.CountryID
+JOIN 
+		(select e1.PersonId, 
+			e1.EnrolmentId, 
+			e1.StartDate as ESD, 
+			ed.StartDate as EDSD, 
+			e1.EndDate as EED, 
+			ed.EndDate as EDED, 
+			e1.SchoolId,
+			e1.Guardianship,
+			e1.UpdatedDate,
+			ed.FTE,
+			ed.AcademicYearOfferedBySchoolId,
+			ROW_Number() OVER(PARTITION BY e1.PersonId ORDER BY ed.status DESC, ed.FTE DESC, CONVERT(date,e1.StartDate,23) DESC) AS StuRank  
+			from Enrolment e1 
+			Join (select *,
+				CASE WHEN EndDate < GETDATE() THEN 'N' ELSE 'Y' END AS 'status',
+				ROW_Number() OVER(PARTITION BY EnrolmentID ORDER BY CONVERT(date,StartDate,23) DESC) AS Seq
+			from EnrolmentDetail) ed on e1.EnrolmentId=ed.EnrolmentId and ed.Seq=1
+		) e on st.PersonId=e.PersonId
+LEFT JOIN School s ON s.SchoolId=e.SchoolId
+LEFT JOIN AcademicYearOfferedBySchool ayobs ON ayobs.AcademicYearOfferedBySchoolId=e.AcademicYearOfferedBySchoolId AND ayobs.SchoolId=s.SchoolId
+LEFT JOIN AcademicYear ay ON ay.AcademicYearId=ayobs.AcademicYearId
+)
+
+SELECT * FROM vw_INTEGRATION_Affiliate
+WHERE Last_Updated_On >= :lastUpdatedOn
+ORDER BY Org_Unit_ID, EDID OFFSET :offset ROWS FETCH NEXT :limit ROWS ONLY]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+'lastUpdatedOn': vars.lastUpdatedOn,
+'offset': vars.offset,
+'limit': vars.limit
+}]]]></db:input-parameters>
+		</db:select>
+		<logger level="INFO" doc:name="Log End EMS Database" doc:id="c0f0ae8c-5e17-4bbf-a0a5-bb9ac795c3d1" message="End EMS Database"/>
+	</sub-flow>
+	<sub-flow name="system-ems-database:get-trialbalance-count:subflow" doc:id="da94558c-0452-43b1-b826-334a7998487a" >
+		<logger level="INFO" doc:name="Log Start EMS DB TrailBalance Count" doc:id="e6f93c42-821c-42f6-8019-749cbaabbaed" message="Start EMS DB TrailBalance Count"/>
+		<ee:transform doc:name="Set SQL Query" doc:id="5a3dbd8a-9459-4aec-93bc-204c6ba078c8" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="sqlQuery" ><![CDATA[%dw 2.0
+output application/java
+---
+'select count(*) from [vw_GLBalances] where YearId=$(vars.year) and MonthId=$(vars.month)'
+  ]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<db:select doc:name="Select Record Count" doc:id="617268c3-c5bc-40cf-bff7-447fefa3c419" config-ref="Database_Config" queryTimeout="${ems.db.select.timeout}" targetValue='#[payload[0].""]' target="unfilteredRowCount">
+			<reconnect frequency="${ems.db.reconnection.frequency}" count="${ems.db.reconnection.attempts}" />
+			<db:sql ><![CDATA[#[vars.sqlQuery]]]></db:sql>
+		</db:select>
+		<logger level="INFO" doc:name="Log End EMS DB TrailBalance Count" doc:id="4482e884-6c41-49bd-8f30-ea682125528f" message="End EMS DB TrailBalance Count"/>
+	</sub-flow>
+	<sub-flow name="system-ems-database:get-transactions-count:subflow" doc:id="a408f953-5a97-4712-827c-7e7ab1a4d550" >
+		<logger level="INFO" doc:name="Log Start EMS DB Transactions Count" doc:id="4795993d-d300-4080-8700-d69cacbc1187" message="Start EMS DB Transactions Count" />
+		<ee:transform doc:name="Set SQL Query" doc:id="90bf4981-79ab-4864-ad23-a2a22709d25f">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="sqlQuery"><![CDATA[%dw 2.0
+output application/java
+---
+'select count(*)  FROM [vw_GLTransactions] Where GlYear=$(vars.sqlQueryParams.year) and [ObjectCodeAccountNumberSegment] IN ($(vars.sqlQueryParams.objectCode)) and ReportingUnit=$(vars.sqlQueryParams.reportingUnit)'
+  ]]></ee:set-variable>
+				<ee:set-variable variableName="sqlQueryLog" ><![CDATA[%dw 2.0
+output application/java
+---
+'Query Parameters for the DT SQL Query: GlYear=$(vars.sqlQueryParams.year) and [ObjectCodeAccountNumberSegment] IN ($(vars.sqlQueryParams.objectCode)) and ReportingUnit=$(vars.sqlQueryParams.reportingUnit)']]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Log SQL Query Params" doc:id="6bb0a7ea-b629-455c-afbc-0ead3dec66c7" message="#[vars.sqlQueryLog]"/>
+		<db:select doc:name="Select Record Count" doc:id="16e58e89-bb70-4236-b5bf-36ba8321d626" config-ref="Database_Config" queryTimeout="${ems.db.select.timeout}" target="unfilteredRowCount" targetValue='#[payload[0].""]' >
+			<reconnect frequency="${ems.db.reconnection.frequency}" count="${ems.db.reconnection.attempts}" />
+			<db:sql ><![CDATA[#[vars.sqlQuery]]]></db:sql>
+		</db:select>
+		<logger level="INFO" doc:name="Log End EMS DB Transactions Count" doc:id="710f5ee3-a74a-4b98-83f8-9b465d0b6200" message="End EMS DB Transactions Count" />
+	</sub-flow>
+</mule>

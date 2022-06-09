@@ -1,0 +1,4 @@
+edId,orgUnitId,lastName,middleName,firstName,preferredName,gender,birthDate,yearLevel,isDisable,cypc,iesFlag,hasCustodyOrder,hasInterventionOrder,birthCountry,lastUpdatedOn
+104974650A,0160,PAYNE SEARLE,ANDREW,MARRACK ,MARRACK,Male,2008-08-13,Year 7,false,false,false,true,false,Australia,2022-01-28T11:57:16.7183548
+105158274P,0160,REICHELT,SCARLET,MIA ,MIA,Female,2008-12-01,Year 7,false,false,false,true,false,Australia,2022-01-28T11:57:16.7183548
+105356402X,0160,BELL,LYNNE,ARIANNA ,ARIANNA,Female,2008-05-12,Year 7,false,false,false,true,false,Australia,2022-01-28T11:57:16.7183548

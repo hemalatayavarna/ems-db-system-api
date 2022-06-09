@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd">
+	<sub-flow
+		name="impl-process-transactions-requests:get-transactions:subflow"
+		doc:id="ec02b350-09c0-4aa6-bfac-349c114eb049">
+		<logger level="INFO" doc:name="Log Start Transactions Requests"
+			doc:id="7a68e66e-84a2-48de-a886-793483c94792"
+			message="Log Start Transactions Requests" />
+		<ee:transform
+			doc:name="Set Variables: sqlQueryParams"
+			doc:id="e22299fd-67aa-46b9-baa0-15131bd6dc31">
+			<ee:message />
+			<ee:variables>
+				<ee:set-variable variableName="sqlQueryParams" ><![CDATA[%dw 2.0
+output application/java
+var objectCode = flatten(attributes.queryParams.*"object-code") joinBy "','" as String
+---
+{
+	"reportingUnit": trim(attributes.queryParams."reporting-unit") as String default "",
+	"objectCode":  "'"++ objectCode ++ "'",
+	"year": trim(attributes.queryParams.year) as Number default 0,
+	"page": trim(attributes.queryParams.page) as Number default 1,
+	"limit": trim(attributes.queryParams.limit) as Number default 0,
+	"offset": (trim(attributes.queryParams.page) - 1)*trim(attributes.queryParams.limit)
+	
+}]]></ee:set-variable>
+			
+</ee:variables>
+		</ee:transform>
+		<flow-ref doc:name="system-ems-database:get-total-transactions-count:subflow" doc:id="255d4e18-4908-4e10-a499-ce64862e0cdf" name="system-ems-database:get-transactions-count:subflow"/>
+		<ee:transform doc:name="Set sqlQueryLimit" doc:id="8652ef39-632d-49f5-9132-a4e0f5b5199f" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="sqlQueryLimit" ><![CDATA[%dw 2.0
+output application/java
+---
+if(vars.sqlQueryParams.limit <= 0 and vars.unfilteredRowCount>0)
+  vars.unfilteredRowCount
+else if(vars.sqlQueryParams.limit <= 0 and vars.unfilteredRowCount<=0)
+	1
+else
+  vars.sqlQueryParams.limit]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<ee:transform doc:name="Set totalPages" doc:id="c6307fa0-5b4e-4466-b067-e0674ab980e4" >
+			<ee:message >
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="totalPages" ><![CDATA[%dw 2.0
+output application/java
+var unfilteredRowCount:Number = vars.unfilteredRowCount as Number
+var sqlQueryLimit:Number = vars.sqlQueryLimit as Number
+---
+if ((unfilteredRowCount mod sqlQueryLimit) == 0)
+  unfilteredRowCount / sqlQueryLimit
+else
+  floor(unfilteredRowCount / sqlQueryLimit) + 1]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Log Record Count" doc:id="ca785044-9750-4b3f-9e9d-0f4509fbc832" message="#['Total Count of Records:' ++ vars.unfilteredRowCount]"/>
+		<choice doc:name="Choice" doc:id="46d3ec29-bd1b-4de8-9521-4714f39cc783" >
+			<when expression="#[vars.sqlQueryParams.page&lt;=vars.totalPages]">
+				<flow-ref doc:name="sys-ems-database:get-transactions-data:subflow" doc:id="b81acde1-034e-4c49-82b7-3f1239cc482f" name="system-ems-database:get-transactions:subflow" />
+				<ee:transform doc:name="Generate Response" doc:id="b7dc8364-0d8a-4fbd-9c5d-f938a957b9e8">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+import p from Mule
+
+output application/json indent=false
+---
+{
+	"_meta": {
+		"pageNumber": vars.sqlQueryParams.page,
+		"limit": vars.sqlQueryParams.limit,
+		"totalRecords":vars.unfilteredRowCount as Number,
+		"totalPages": vars.totalPages
+	},
+	"payload": payload map ( item , index ) -> {
+		year: item.GlYear default 0,
+		month: item.GlMonth default "",
+		glSource: p('default.system'),
+		journalId: item.JournalId as String default "",
+		transactionDescription: trim(item.TransactionDescription default ""),
+		accountNumber: item.AccountNumber default "",
+		objectCode: item.ObjectCodeAccountNumberSegment default "",
+		accountDescription: trim(item.AccountDescription default ""),
+		amount: item.Amount default 0,
+		reportingUnit: trim(item.ReportingUnit as String default ""),
+		companyNumber: item.CompanyNumber default ""
+	}
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Log No Record Present" doc:id="49328fbc-bb50-4b5b-9ee1-bb2168b4c52f" message="#['The requested page number: $(vars.sqlQueryParams.page) exceeds the total pages $(vars.totalPages)']" />
+				<ee:transform doc:name="Generate Empty Payload" doc:id="4b2e8d04-1013-4385-bc4c-3a5021cef01b" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"_meta": {
+		"pageNumber": vars.sqlQueryParams.page,
+		"limit": vars.sqlQueryParams.limit,
+		"totalRecords":vars.unfilteredRowCount as Number
+	},
+	"payload":[]
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</otherwise>
+		</choice>
+		<logger level="INFO" doc:name="Log End Transactions Requests"
+			doc:id="069dae3d-76aa-4f4b-9d49-de2ddf534074"
+			message="Log End Transactions Requests" />
+	</sub-flow>
+	</mule>

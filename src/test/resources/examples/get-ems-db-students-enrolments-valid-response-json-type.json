@@ -1,0 +1,41 @@
+[
+	{
+		"edId": "105871203K",
+		"isPrimary": true,
+		"schoolName": "Greenock Primary School",
+		"fte": 1.0,
+		"studentRowNumber": 1,
+		"enrolmentEndDate": null,
+		"enrolmentStartDate": "2016-02-01",
+		"studentStatus": "Y",
+		"orgUnitId": "0160",
+		"yearLevel": "Year 6",
+		"lastUpdatedOn": "2022-03-30T11:57:16.7183548"
+	},
+	{
+		"edId": "105871412X",
+		"isPrimary": true,
+		"schoolName": "Greenock Primary School",
+		"fte": 1.0,
+		"studentRowNumber": 1,
+		"enrolmentEndDate": null,
+		"enrolmentStartDate": "2016-02-01",
+		"studentStatus": "Y",
+		"orgUnitId": "0160",
+		"yearLevel": "Year 6",
+		"lastUpdatedOn": "2022-03-30T11:57:16.7183548"
+	},
+	{
+		"edId": "105871909M",
+		"isPrimary": true,
+		"schoolName": "Greenock Primary School",
+		"fte": 1.0,
+		"studentRowNumber": 1,
+		"enrolmentEndDate": null,
+		"enrolmentStartDate": "2016-02-01",
+		"studentStatus": "Y",
+		"orgUnitId": "0160",
+		"yearLevel": "Year 6",
+		"lastUpdatedOn": "2022-03-30T11:57:16.7183548"
+	}
+]

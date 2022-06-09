@@ -1,0 +1,8 @@
+{
+	"queryParams": {
+		"year": "2021",
+		"period": "09",
+		"page":"1",
+		"limit":"2"
+	}
+}

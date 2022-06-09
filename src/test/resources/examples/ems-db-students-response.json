@@ -1,0 +1,68 @@
+[
+ {
+    "HasInterventionOrder": 0,
+    "Birth_Date": "2008-08-13",
+    "School_Name": "Greenock Primary School",
+    "Last_Name": "PAYNE SEARLE",
+    "HasCustodyOrder": 1,
+    "Middle_Name": "ANDREW",
+    "Gender_ID": "M",
+    "CYPC_ID": "N",
+    "Year_Level": "Year 07",
+    "Birth_Country": "Australia",
+    "Disability_Status_ID": "N",
+    "EDID": "104974650A",
+    "Org_Unit_ID": "0160",
+    "Last_Updated_On": {
+      "minutesOffset": 0,
+      "timestamp": "2022-01-28T11:57:16.7183548"
+    },
+    "IsInternationalStudent": "",
+    "First_Name": "MARRACK ",
+    "Preferred_Name": "MARRACK"
+  },
+  {
+    "HasInterventionOrder": 0,
+    "Birth_Date": "2008-12-01",
+    "School_Name": "Greenock Primary School",
+    "Last_Name": "REICHELT",
+    "HasCustodyOrder": 1,
+    "Middle_Name": "SCARLET",
+    "Gender_ID": "F",
+    "CYPC_ID": "N",
+    "Year_Level": "Year 07",
+    "Birth_Country": "Australia",
+    "Disability_Status_ID": "N",
+    "EDID": "105158274P",
+    "Org_Unit_ID": "0160",
+    "Last_Updated_On": {
+      "minutesOffset": 0,
+      "timestamp": "2022-01-28T11:57:16.7183548"
+    },
+    "IsInternationalStudent": "",
+    "First_Name": "MIA ",
+    "Preferred_Name": "MIA"
+  },
+  {
+    "HasInterventionOrder": 0,
+    "Birth_Date": "2008-05-12",
+    "School_Name": "Greenock Primary School",
+    "Last_Name": "BELL",
+    "HasCustodyOrder": 1,
+    "Middle_Name": "LYNNE",
+    "Gender_ID": "F",
+    "CYPC_ID": "N",
+    "Year_Level": "Year 07",
+    "Birth_Country": "Australia",
+    "Disability_Status_ID": "N",
+    "EDID": "105356402X",
+    "Org_Unit_ID": "0160",
+    "Last_Updated_On": {
+      "minutesOffset": 0,
+      "timestamp": "2022-01-28T11:57:16.7183548"
+    },
+    "IsInternationalStudent": "",
+    "First_Name": "ARIANNA ",
+    "Preferred_Name": "ARIANNA"
+  }
+]

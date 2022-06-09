@@ -1,0 +1,26 @@
+[
+	{
+		"GlYear": 2021,
+		"GlMonth": 3,
+		"JournalId": "134",
+		"TransactionDescription": "Opening Balance Journal",
+		"AccountNumber": "1302-0000-7281-06",
+		"ObjectCodeAccountNumberSegment": "7281-06",
+		"AccountDescription": "STUDENT LEARNING MATERIALS",
+		"Amount": 100.0,
+		"ReportingUnit": "3305332464273000151",
+		"CompanyNumber": ""
+	},
+	{
+		"GlYear": 2021,
+		"GlMonth": 4,
+		"JournalId": "188",
+		"TransactionDescription": "Opening Balance Journal",
+		"AccountNumber": "1409-0000-7281-06",
+		"ObjectCodeAccountNumberSegment": "7281-06",
+		"AccountDescription": "STUDENT LEARNING MATERIALS",
+		"Amount": 506.0,
+		"ReportingUnit": "3305332464273000151",
+		"CompanyNumber": ""
+	}
+]

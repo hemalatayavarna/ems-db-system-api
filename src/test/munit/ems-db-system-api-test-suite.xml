@@ -1,0 +1,344 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:munit="http://www.mulesoft.org/schema/mule/munit" xmlns:munit-tools="http://www.mulesoft.org/schema/mule/munit-tools"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xsi:schemaLocation="
+		http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+		http://www.mulesoft.org/schema/mule/munit http://www.mulesoft.org/schema/mule/munit/current/mule-munit.xsd
+		http://www.mulesoft.org/schema/mule/munit-tools  http://www.mulesoft.org/schema/mule/munit-tools/current/mule-munit-tools.xsd">
+	<munit:config name="impl-process-trial-balance-requests-test-suite.xml" />
+	<munit:before-test name="ems-db-system-api-test-suiteBefore_Test" doc:id="3e962f93-1eb8-4e20-b048-44b7461f6fe1" >
+		<munit-tools:mock-when doc:name="Mock Async" doc:id="4d6b27bc-402c-41dd-b80a-b217b93d1675" processor="async">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Async" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+
+			</munit-tools:mock-when>
+		<munit-tools:mock-when doc:name="Mock Publish to Error MQ" doc:id="62555ae3-ff98-4ac1-bca2-a800880d276a" processor="jms:publish">
+				<munit-tools:with-attributes>
+					<munit-tools:with-attribute whereValue="Publish To Error MQ" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:mock-when>
+	</munit:before-test>
+	<munit:test name="impl-process-trial-balance-requests-test-suite-impl-process-trial-balance-requests:get-trialbalance:subflowTest" doc:id="bd36e618-2397-41ad-acae-ba38b24b1e10" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Select Record Count" doc:id="c3be4fe5-512d-4d37-8180-0bc94081ea80" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Database_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('examples/ems-db-trial-balance-count.json')]" mediaType="application/json" />
+					<munit-tools:variables >
+						<munit-tools:variable key="unfilteredRowCount" value="#['2']" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Select EMS Trial Balance" doc:id="e49f36a9-f8ba-4f1e-8cfa-ddba31d91b76" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Select Trial Balance" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('examples/ems-db-trial-balance-response.json')]" mediaType="application/json" />
+				</munit-tools:then-return>
+			
+</munit-tools:mock-when>
+		
+</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="3685f95a-0fa7-4e4b-9f7f-35de0b3e07a8" >
+				<munit:attributes value="#[MunitTools::getResourceAsString('examples/get-ems-db-trial-balance-api-valid-query-params.json')]" mediaType="application/json" />
+
+			</munit:set-event>
+			<flow-ref doc:name="get:\reports\trial-balance:ems-db-system-api-config" doc:id="8addc525-6ea6-41c8-abe4-306e4c049443" name="get:\reports\trial-balance:ems-db-system-api-config" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Select EMS Trial Balance" doc:id="eab3134b-e480-4258-9617-0862326b2274" processor="db:select" atLeast="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Select Trial Balance" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert doc:name="Assert payload is Expected" doc:id="33373049-7c7f-4087-af31-c8dc52953b11" message="Actual response matches with the Expected response">
+				<munit-tools:that ><![CDATA[#[import * from dw::test::Asserts 
+ ---
+payload must equalToResource("examples/get-ems-db-trial-balance-valid-response.json","application/json")]]]></munit-tools:that>
+			</munit-tools:assert>						
+		</munit:validation>
+	</munit:test>
+	<munit:test name="impl-process-transactions-requests-test-suite-impl-process-transactions-requests:get-transactions:subflowTest" doc:id="5c6bab3f-32c4-4a75-b81c-8a4b7914e5fe" description="Test">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="Select Record Count" doc:id="18b826e2-804e-4e23-902b-15a442de485f" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Database_Config" attributeName="config-ref" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('examples/ems-db-transactions-count.json')]" mediaType="application/json" />
+					<munit-tools:variables >
+						<munit-tools:variable key="unfilteredRowCount" value="#['2']" />
+					</munit-tools:variables>
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+			<munit-tools:mock-when doc:name="Select EMS Transactions" doc:id="bee4692a-adde-41b7-99ba-e880b613401d" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Select Transactions" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('examples/ems-db-transactions-response.json')]" mediaType="application/json" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<munit:set-event doc:name="Set Event" doc:id="4aa03e89-6e2a-49b9-a704-aafb58474fda">
+				<munit:attributes value="#[MunitTools::getResourceAsString('examples/get-ems-db-transactions-api-valid-query-params.json')]" mediaType="application/json" />
+				</munit:set-event>
+				<flow-ref doc:name="get:\reports\trial-balance\transactions:ems-db-system-api-config" doc:id="44c3bff9-7dfa-4419-ab9f-4fdcf3ef83ba" name="get:\reports\trial-balance\transactions:ems-db-system-api-config" />
+			</munit:execution>
+			<munit:validation>
+				<munit-tools:verify-call doc:name="Select EMS Transactions" doc:id="cdfeeba8-3e59-4d54-844a-afe5942c1980" processor="db:select" atLeast="1">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Select Transactions" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				</munit-tools:verify-call>
+				<munit-tools:assert doc:name="Assert payload is Expected" doc:id="149b76a2-44d7-4b57-9776-40a5b16f88de" message="Actual response matches with the Expected response">
+					<munit-tools:that><![CDATA[#[import * from dw::test::Asserts 
+ ---
+payload must equalToResource("examples/get-ems-db-transactions-valid-response.json","application/json")]]]></munit-tools:that>
+				</munit-tools:assert>
+			</munit:validation>
+		</munit:test>
+	<munit:test name="ems-db-system-api-ems-db-system-api:log-unit-test" doc:id="cc340e30-85e7-48ac-bfb9-459af78bc51a" >
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="49e86cbb-48b7-4780-8481-e48afecab3ab" >
+				<munit:attributes value="#[MunitTools::getResourceAsString('examples/get-ems-db-students-api-valid-query-params-json-type.json')]" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="ems-db-system-api:log:subflow" doc:id="565d75a8-8b0a-4e0d-b256-db3fbbf358ae" name="ems-db-system-api:log:subflow"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:name="Verify call Log Query Parameters" doc:id="769b8c75-be60-4a80-b908-b1eda71086a2" processor="logger" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Log Query Parameters" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify call Log Header Parameters" doc:id="d499344a-6b9c-4efa-9ca7-0cd4f41f0273" processor="logger" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Log Headers Parameters" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="impl-process-students-requests-test-suite-impl-process-students-json-type-requests:get-students:subflowTest" doc:id="902f5d30-f5f3-4304-a2b4-366df8f5e8d4" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Select EMS Students" doc:id="a3a38d2a-a36c-4596-9c41-66511a0eeaaf" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Select Student Enrolement" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('examples/ems-db-students-response.json')]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="7243ceb9-07c8-4a2e-9429-dc8c7bb9da31" >
+				<munit:attributes value="#[MunitTools::getResourceAsString('examples/get-ems-db-students-api-valid-query-params-json-type.json')]" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="get:\students:ems-db-system-api-config" doc:id="ae140387-5aae-46ab-b870-0e3dd79d5b26" name="get:\students:ems-db-system-api-config"/>
+		</munit:execution>
+		<munit:validation>
+			<munit-tools:verify-call doc:name="Verify call Log Query Parameters" doc:id="9bff0d10-7fe0-493a-8770-dc121f68999a" processor="logger">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Log Query Parameters" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify call Log Query Parameters" doc:id="13f43e5a-274d-4176-9c0a-a83bf1d80f8e" processor="logger">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Log Headers Parameters" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert doc:name="Assert payload is Expected" doc:id="63ef2f98-29e7-45d2-bc01-c5cd917cc2ae" message="Actual response matches with the Expected response">
+				<munit-tools:that ><![CDATA[#[import * from dw::test::Asserts 
+ ---
+payload must equalToResource("examples/get-ems-db-students-api-valid-response-json-type.json","application/json")]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+		</munit:test>
+	<munit:test name="impl-process-students-requests-test-suite-impl-process-students-csv-type-requests:get-students:subflowTest" doc:id="6b130935-1eb1-4b86-8705-33d04930e88c" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Select EMS Students" doc:id="f6f0a178-4ffb-4456-a4a2-7ae910a6a4e9" processor="db:select" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Select Student Enrolement" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('examples/ems-db-students-response.json')]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="c26c3eb0-a571-4592-a5cf-192fd2a29f96" >
+				<munit:attributes value="#[MunitTools::getResourceAsString('examples/get-ems-db-students-api-valid-query-params-csv-type.json')]" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="get:\students:ems-db-system-api-config" doc:id="893c622a-4e78-4662-a667-475d9a78592e" name="get:\students:ems-db-system-api-config" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call Log Query Parameters" doc:id="520da6d1-ec7a-42e0-9492-7439003b827e" processor="logger" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Log Query Parameters" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify call Log Query Parameters" doc:id="524d8095-2fd7-4e1c-8ff6-93a565b295b0" processor="logger" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Log Headers Parameters" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert doc:name="Assert payload is Expected" doc:id="c96a4cb0-c036-4964-8e07-97760ca291de" message="Actual response matches with the Expected response">
+				<munit-tools:that ><![CDATA[#[import * from dw::test::Asserts 
+ ---
+payload must equalToResource("examples/get-ems-db-students-api-valid-response-csv-type.csv","application/csv")]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="ems-db-system-api-test-suite-get:\students\guardians-json-type-requests:get-guardians:subflowTest" doc:id="f424506c-549a-4234-90b2-5d322ae928fb" description="Test">
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Select EMS Guardians" doc:id="a5719a9f-2fc4-43b1-a579-09d0e4e29c1c" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Select Guardian Enrolement" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('examples/ems-db-students-guardians-response.json')]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="84d89a70-44de-4e59-ade0-facdb2d929a6" >
+				<munit:attributes value="#[MunitTools::getResourceAsString('examples/get-ems-db-students-api-valid-query-params-json-type.json')]" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="get:\students\guardians:ems-db-system-api-config" doc:id="d08949b0-3fef-467a-adf6-4f8139538aff" name="get:\students\guardians:ems-db-system-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call Log Query Parameters" doc:id="0b955315-780b-4cef-a8b6-3141a649680a" processor="logger" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Log Query Parameters" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify call Log Query Parameters" doc:id="931e044a-2ded-4499-a1fb-9f6374327192" processor="logger" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Log Headers Parameters" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert doc:name="Assert payload is Expected" doc:id="c1fa7fa6-e9d2-452d-9e2f-2412bac4df01" message="Actual response matches with the Expected response" >
+				<munit-tools:that ><![CDATA[#[import * from dw::test::Asserts 
+ ---
+payload must equalToResource("examples/get-ems-db-students-guardians-valid-response-json-type.json","application/json")]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="ems-db-system-api-test-suite-get:\students\guardians-csv-type-requests:get-guardians:subflowTest" doc:id="02c306b5-9607-4dc2-bc0f-972f27c3a4f6" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Select EMS Guardians" doc:id="edbfdbf2-dc10-4268-91f1-7c24d9de7415" processor="db:select" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Select Guardian Enrolement" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('examples/ems-db-students-guardians-response.json')]" mediaType="application/json" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="bd7cb7ca-df6e-433b-a32a-eb15c0b724c4" >
+				<munit:attributes value="#[MunitTools::getResourceAsString('examples/get-ems-db-students-api-valid-query-params-csv-type.json')]" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="get:\students\guardians:ems-db-system-api-config" doc:id="84eb508b-2313-4f70-91da-b7174d4228e5" name="get:\students\guardians:ems-db-system-api-config" />
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify call Log Query Parameters" doc:id="542ae0d2-defe-4f6e-a7e0-07fab5880e1c" processor="logger" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Log Query Parameters" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify call Log Query Parameters" doc:id="1bfbc2a4-7dac-4bf0-ab04-f8f71ecebf03" processor="logger" >
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Log Headers Parameters" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert doc:name="Assert payload is Expected" doc:id="b028b146-b170-4f8d-a569-fd83ff5a78a0" message="Actual response matches with the Expected response" >
+				<munit-tools:that ><![CDATA[#[import * from dw::test::Asserts 
+ ---
+payload must equalToResource("examples/get-ems-db-students-guardians-valid-response-csv-type.csv","application/csv")]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="ems-db-system-api-test-suite-get:\students\enrolments-json-type-requests:get-students\enrolments:subflowTest" doc:id="58926669-adde-4a5b-a432-362eb91eefe2" >
+		<munit:behavior >
+			<munit-tools:mock-when doc:name="Select EMS Sites" doc:id="bee6f3ba-8862-4c28-8cab-849df6f614cc" processor="db:select">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Select Sites Enrolement" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('examples/ems-db-students-enrolments-response.json')]" mediaType="application/json" encoding="UTF-8" />
+				</munit-tools:then-return>
+			</munit-tools:mock-when>
+		</munit:behavior>
+		<munit:execution >
+			<munit:set-event doc:name="Set Event" doc:id="6d5a2280-209a-4f23-9a3d-964011a7c5e4" >
+				<munit:attributes value="#[MunitTools::getResourceAsString('examples/get-ems-db-students-api-valid-query-params-json-type.json')]" mediaType="application/json" />
+			</munit:set-event>
+			<flow-ref doc:name="get:\students\enrolments:ems-db-system-api-config" doc:id="7edece45-50f6-4f1f-a0a7-435b6029e279" name="get:\students\enrolments:ems-db-system-api-config"/>
+		</munit:execution>
+		<munit:validation >
+			<munit-tools:verify-call doc:name="Verify Log End EMS Database" doc:id="84e6a32e-66cc-42cc-9ed8-008560fa2359" processor="logger">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Log End EMS Database" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:verify-call doc:name="Verify Log End Get Enrolments Implementation" doc:id="f00d00a8-a341-40d8-91f4-749755042132" processor="logger">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Log End Get Enrolments Implementation" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+			</munit-tools:verify-call>
+			<munit-tools:assert doc:name="Assert Payload is Expected" doc:id="37d83553-9976-456e-ae07-9bb2e8b7c7c8" >
+				<munit-tools:that ><![CDATA[#[import * from dw::test::Asserts 
+ ---
+payload must equalToResource("examples/get-ems-db-students-enrolments-valid-response-json-type.json","application/json")]]]></munit-tools:that>
+			</munit-tools:assert>
+		</munit:validation>
+	</munit:test>
+	<munit:test name="ems-db-system-api-test-suite-get:\students\enrolments-csv-type-requests:get-students\enrolments:subflowTest" doc:id="dcd06dbd-52b8-4940-b167-af0321ac99d8">
+			<munit:behavior>
+				<munit-tools:mock-when doc:name="Select EMS Sites" doc:id="f5869282-7b3e-4271-b0f4-3904effa904b" processor="db:select">
+					<munit-tools:with-attributes>
+						<munit-tools:with-attribute whereValue="Select Sites Enrolement" attributeName="doc:name" />
+					</munit-tools:with-attributes>
+				<munit-tools:then-return >
+					<munit-tools:payload value="#[MunitTools::getResourceAsString('examples/ems-db-students-enrolments-response.json')]" mediaType="application/json" encoding="UTF-8" />
+				</munit-tools:then-return>
+				</munit-tools:mock-when>
+			</munit:behavior>
+			<munit:execution>
+				<munit:set-event doc:name="Set Event" doc:id="c2834321-bc14-44bf-8ce2-2aeba392db33">
+				<munit:attributes value="#[MunitTools::getResourceAsString('examples/get-ems-db-students-api-valid-query-params-csv-type.json')]" mediaType="application/json" />
+				</munit:set-event>
+				<flow-ref doc:name="get:\students\enrolments:ems-db-system-api-config" doc:id="3097ff50-141a-4e93-a6e0-d925a2e6ca15" name="get:\students\enrolments:ems-db-system-api-config" />
+			</munit:execution>
+			<munit:validation>
+				<munit-tools:verify-call doc:name="Verify Log End EMS Database" doc:id="a5e0220b-9e4d-4351-b66b-6c54c60eb05e" processor="logger">
+					<munit-tools:with-attributes>
+						<munit-tools:with-attribute whereValue="Log End EMS Database" attributeName="doc:name" />
+					</munit-tools:with-attributes>
+				</munit-tools:verify-call>
+				<munit-tools:verify-call doc:name="Verify Log End Get Enrolments Implementation" doc:id="a793752d-98e9-4681-9a8b-8d305e940eaf" processor="logger">
+				<munit-tools:with-attributes >
+					<munit-tools:with-attribute whereValue="Log End Get Enrolments Implementation" attributeName="doc:name" />
+				</munit-tools:with-attributes>
+				</munit-tools:verify-call>
+				<munit-tools:assert doc:name="Assert Payload is Expected" doc:id="2834909f-eef1-4260-a2c4-128551bf11e2">
+					<munit-tools:that><![CDATA[#[import * from dw::test::Asserts 
+ ---
+payload must equalToResource("examples/get-ems-db-students-enrolments-valid-response-csv-type.csv","application/csv")]]]></munit-tools:that>
+				</munit-tools:assert>
+			</munit:validation>
+		</munit:test>
+	
+
+
+
+
+</mule>

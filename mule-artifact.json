@@ -1,0 +1,10 @@
+{
+  "minMuleVersion": "4.3.0",
+  "secureProperties": [
+	  "secure.key", 
+	  "secure::ems.db.name",
+	  "secure::ems.db.password",
+	  "secure::ems.db.username",
+	  "secure::mq.broker.username",
+	  "secure::mq.broker.password"]
+}
